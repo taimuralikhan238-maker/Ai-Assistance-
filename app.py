@@ -6,12 +6,10 @@ import re
 from io import BytesIO
 
 import streamlit as st
-from docx import Document
 from google import genai
 from google.genai import types
-from pypdf import PdfReader
 
-MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
 MAX_RESUME_CHARS = 20000
 MAX_JD_CHARS = 8000
 
@@ -54,6 +52,8 @@ def extract_text(uploaded_file) -> str:
     data = uploaded_file.getvalue()
 
     if name.endswith(".pdf"):
+        from pypdf import PdfReader  # imported here so a missing package gives a clear message
+
         reader = PdfReader(BytesIO(data))
         if reader.is_encrypted:
             try:
@@ -64,6 +64,8 @@ def extract_text(uploaded_file) -> str:
         return "\n".join(pages).strip()
 
     if name.endswith(".docx"):
+        from docx import Document
+
         doc = Document(BytesIO(data))
         parts = [p.text for p in doc.paragraphs if p.text.strip()]
         for table in doc.tables:
